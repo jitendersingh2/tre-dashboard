@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { NbDialogService } from '@nebular/theme';
 import { LocalDataSource } from 'ng2-smart-table';
-import * as html2Pdf from 'html2pdf.js';
+// import * as html2Pdf from 'html2pdf.js';
 import { EditProjectDetailsDialogComponent } from './edit-project-details-dialog/edit-project-details-dialog.component';
 import { RowSelectComponent } from './row-select/row-select.component';
-import { SmartTableServiceService } from './smart-table-service.service'
+import { SmartTableServiceService } from './smart-table-service.service';
 
 import { SmartTableData } from '../../../@core/data/smart-table';
 
@@ -23,6 +24,8 @@ export class SmartTableComponent {
   selectedSectors: Array<String> = [];
   selectedCountries: Array<String> = [];
   selectedApprovalYears: Array<String> = [];
+  showSelectedProjects: boolean = false;
+  selectedProjects: any = [];
   indicators: any = this.service.getResultIndicators().filter(ind => ind.PROJ_IND_USAGE_TYPE_CODE === "CI").map(ind => ({
     indicator: ind.IND_NAME,
     target: ind.TGT_VAL_TEXT,
@@ -41,10 +44,11 @@ export class SmartTableComponent {
     actions: {
       add: false,
       delete: false,
+      edit: false,
     },
-    edit: {
-      editButtonContent: '<i class="nb-edit" (click)="editProjectDetails($event)"></i>',
-    },
+    // edit: {
+    //   editButtonContent: '<i class="nb-edit" (click)="editProjectDetails($event)"></i>',
+    // },
     columns: {
       select: {
         title: '',
@@ -88,7 +92,11 @@ export class SmartTableComponent {
 
   source: LocalDataSource = new LocalDataSource();
 
-  constructor(private service: SmartTableData, private smartTableServiceService: SmartTableServiceService, private dialogService: NbDialogService) {
+  constructor(
+    private service: SmartTableData, 
+    public smartTableServiceService: SmartTableServiceService, 
+    private dialogService: NbDialogService,
+    private router: Router) {
     const data = this.service.getData().map((projectDetails) => ({
       id: projectDetails.PROJ_ID,
       name: projectDetails.PROJ_DISPLAY_NAME,
@@ -113,7 +121,8 @@ export class SmartTableComponent {
       ...this.service.getData01()[0],
       indicators: this.indicators,
     }));
-    this.data = data;
+    this.data = this.smartTableServiceService.allProjects.length > 0 ? this.smartTableServiceService.allProjects : data;
+    // this.smartTableServiceService.selectedProjects = 
     this.smartTableServiceService.setAllProjects(this.data);
     this.source.load(data);
     this.sectors = this.removeDuplicatesFromArray(data.map(project => project.sector));
@@ -124,6 +133,17 @@ export class SmartTableComponent {
 
   removeDuplicatesFromArray(A: Array<String>): Array<String> {
     return [...new Set(A)];
+  }
+
+  next() {
+    this.router.navigate(['pages', 'projects-edit']).then(nav => {
+      console.log('nav', nav); // true if navigation is successful
+    }, err => {
+      console.log('err', err) // when there's an error
+    });;
+    // this.selectedProjects = this.smartTableServiceService.selectedProjects;
+    // console.log('this.selectedProjects- ', this.selectedProjects);
+    // this.showSelectedProjects = true;
   }
 
   filterTable(filterType: string, filterValue: Array<String>): void {

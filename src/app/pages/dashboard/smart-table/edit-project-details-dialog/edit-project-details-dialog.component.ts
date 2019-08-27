@@ -1,7 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { NbDialogRef } from '@nebular/theme';
-import { NbIconLibraries } from '@nebular/theme';
-import { NbWindowService } from '@nebular/theme';
 
 @Component({
   selector: 'ngx-edit-project-details-dialog',
@@ -11,70 +9,35 @@ import { NbWindowService } from '@nebular/theme';
 export class EditProjectDetailsDialogComponent implements OnInit {
 
   @Input() data: any;
-  expectedIndicators: Array<any> = [];
-  settings = {
-    mode: 'external',
-    hideSubHeader	: true,
-    actions: {
-      add: false,
-      delete: false,
-    },
-    edit: {
-      editButtonContent: '<nb-checkbox status="primary" checked="true" (checkedChange)="checkedChange($event, result)" />',
-    },
-    columns: {
-      IND_NAME: {
-        title: 'Indicator',
-        type: 'string',
-      },
-      TGT_VAL_TEXT: {
-        title: 'Target Value',
-        type: 'string',
-      },      
-    },
-  };
+  expectedResults: Array<string> = [];
   
-  constructor(protected ref: NbDialogRef<EditProjectDetailsDialogComponent>, iconsLibrary: NbIconLibraries, private windowService: NbWindowService) {
-    iconsLibrary.registerFontPack('fa', { packClass: 'fa', iconClassPrefix: 'fa' });
-  }
+  constructor(protected ref: NbDialogRef<EditProjectDetailsDialogComponent>) { }
 
   ngOnInit() {
-    this.expectedIndicators = this.data.projectDetails.indicators;
+    this.expectedResults = this.data.projectDetails.expectedResults;
   }
 
   updateProjectDetails(fieldType: string, fiedlValue: string) {
     this.data.projectDetails[fieldType] = fiedlValue;
-  }
-
-  openWindow(contentTemplate, data) {
-    this.windowService.open(
-      contentTemplate,
-      {
-        title: 'Project Context',
-        context: {
-          text: data,
-        },
-      },
-    );
   }
   
   cancel() {
     this.ref.close();
   }
 
-  checkedChange(checked: boolean, result: any) {
+  checkedChange(checked: boolean, result: string) {
     console.log('e- ', checked, result);
-    const { indicators } = this.data.projectDetails;
-    let newIndicators = [];
+    const { expectedResults } = this.data.projectDetails;
+    let newExpectedResults = [];
     if(!checked) {
-      newIndicators = indicators.filter(originalIndicator => originalIndicator.indicator !== result.indicator);
+      newExpectedResults = expectedResults.filter(originalResult => originalResult !== result);
     } else {
-      newIndicators = [...indicators, result].sort();
+      newExpectedResults = [...expectedResults, result].sort();
     }
-    this.expectedIndicators = newIndicators;
+    this.expectedResults = newExpectedResults;
   }
 
   submit() {
-    this.ref.close({...this.data.projectDetails, indicators: this.expectedIndicators});
+    this.ref.close({...this.data.projectDetails, expectedResults: this.expectedResults});
   }
 }
