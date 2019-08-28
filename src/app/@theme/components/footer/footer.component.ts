@@ -5,7 +5,7 @@ import { Component } from '@angular/core';
   styleUrls: ['./footer.component.scss'],
   template: `
     <div class="footer">
-      <span>WFA 1.0.0</span>
+      <span>TRE 1.0.0</span>
     </div>
   `,
 })
