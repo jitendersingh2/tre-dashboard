@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { NbDialogService } from '@nebular/theme';
+import { NbDialogService, NbWindowService } from '@nebular/theme';
 import { SmartTableServiceService } from '../smart-table/smart-table-service.service';
 import { IndicatorsDialogComponent } from './indicators-dialog/indicators-dialog.component';
 
@@ -12,11 +12,30 @@ import { IndicatorsDialogComponent } from './indicators-dialog/indicators-dialog
 export class ProjectsEditComponent implements OnInit {
   selectedProjects: any = [];
 
-  constructor(public smartTableServiceService: SmartTableServiceService, private router: Router, private dialogService: NbDialogService,) { }
+  constructor(
+    public smartTableServiceService: SmartTableServiceService, 
+    private router: Router, 
+    private dialogService: NbDialogService,
+    private windowService: NbWindowService,
+  ) { }
 
   ngOnInit() {
     this.selectedProjects = this.smartTableServiceService.selectedProjects;
     console.log('this.selectedProjects- ', this.selectedProjects);
+  }
+
+  openWindow(contentTemplate, data) {
+    this.windowService.open(
+      contentTemplate,
+      {
+        title: 'Project Context',
+        // hasBackdrop: false,
+        windowClass: 'context-dialog',
+        context: {
+          text: data,
+        },
+      },
+    );
   }
 
   submit(project) {
@@ -42,12 +61,9 @@ export class ProjectsEditComponent implements OnInit {
       context: {
         data: {
           project
-          // allIndicators: project.allIndicators,
-          // projectId: project.id,
         }
       },
     }).onClose.subscribe(payload => {
-      console.log('payload- ', payload);
       if(payload && payload.indicators && payload.indicators.length > 0) {
         this.selectedProjects = this.selectedProjects.map((project) => {
           if(project.id === payload.projectId) {
